@@ -19,66 +19,6 @@ passport.deserializeUser((id, done) => {
       done(error, null);
     });
 });
-
-// passport.use(
-//   new GoogleStrategy(
-//     {
-//       clientID: process.env.GAPP_CLIENT_ID,
-//       clientSecret: process.env.GAPP_CLIENT_SECRET,
-//       callbackURL: '/api/auth/google/callback',
-//     },
-//     async (accessToken, refreshToken, profile, done) => {
-//       try {
-//         const existingUser = await User.findOne({ googleId: profile.id });
-
-//         if (existingUser) {
-//           const token = jwt.sign(
-//             {
-//               name: existingUser.name,
-//               email: existingUser.email,
-//               exp: Math.floor(Date.now() / 1000) + 1209600, // 14 days expiration
-//               iat: Math.floor(Date.now() / 1000), // Issued at date
-//             },
-//             process.env.JWT_SECRET
-//           );
-
-//           return done(null, { user: existingUser, token });
-//         }
-
-//         //TODO this function should be reviewd based on our user model
-
-//         const newUser = await new User({
-//           firstName: profile.displayName,
-//           email: profile.emails[0].value,
-//           googleId: profile.id,
-//           avatar: profile.photos[0].value,
-//         }).save();
-
-//         await sendEmail(
-//           newUser.email,
-//           'Welcome to Hazy-Ripples voluntary events',
-//           `Hello ${newUser.name}, your account has been created successfully.`
-//         );
-
-//         const token = jwt.sign(
-//           {
-//             name: newUser.name,
-//             email: newUser.email,
-//             exp: Math.floor(Date.now() / 1000) + 1209600, // 14 days expiration
-//             iat: Math.floor(Date.now() / 1000), // Issued at date
-//           },
-//           process.env.JWT_SECRET
-//         );
-
-//         return done(null, { user: newUser, token });
-//       } catch (error) {
-//         console.error('Error with Google OAuth:', error);
-//         return done(error, null);
-//       }
-//     }
-//   )
-// );
-
 const generateJWT = (user) => { 
   return jwt.sign(
       {
@@ -150,6 +90,9 @@ passport.use(
         const birthday = await getbirthDay(accessToken);
         const phoneNumber = await getPhoneNumber(accessToken);
         const gender = await getGender(accessToken);
+        if (phoneNumber === 0) {
+          phoneNumber = null;
+        }
 
         // User doesn't exist, create a new user and save to the database
         const newUser = new UserModel({
@@ -159,7 +102,7 @@ passport.use(
           avatar: profile.photos[0]?.value || null, // Make sure to check if profile.photos is not empty before accessing index 0
           firstname: profile._json.given_name,
           lastname: profile._json.family_name,
-          phoneNumber: phoneNumber || "00000000000",
+          phoneNumber: phoneNumber,
           gender: gender || null,
           birthday: birthday || null,
         });

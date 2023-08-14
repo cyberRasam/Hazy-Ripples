@@ -1,9 +1,10 @@
 const swaggerJsdoc = require("swagger-jsdoc");
-
+require("dotenv").config();
 
 const swaggerOptions = {
     definition: {
       openapi: "3.0.0",
+      host: `${process.env.DOMAIN}`,
       info: {
         title: "Hazy Ripples Voluntary platform",
         version: "0.1.0",
@@ -21,7 +22,7 @@ const swaggerOptions = {
       },
       servers: [
         {
-          url: "http://localhost:3000",
+          url: `${process.env.DOMAIN}`,
         },
       ],
     },
@@ -33,9 +34,4 @@ const swaggerOptions = {
   };
 
 const specs = swaggerJsdoc(swaggerOptions);
-
-
-
-
-
 module.exports = specs;
